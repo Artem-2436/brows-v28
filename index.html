@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asinhrom Search | Premium Experience</title>
+    <title>Asinhrom Search | Final</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -13,89 +13,48 @@
             theme: {
                 extend: {
                     colors: {
-                        gold: {
-                            DEFAULT: '#C5A059',
-                            light: '#D4AF37',
-                            dark: '#AA8B4B',
-                            bg: '#FBFBFA'
-                        }
+                        gold: { DEFAULT: '#C5A059', light: '#D4AF37', dark: '#AA8B4B' },
                     },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                    boxShadow: {
-                        'gold-glow': '0 4px 20px -2px rgba(197, 160, 89, 0.25)',
-                    }
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    boxShadow: { 'gold-glow': '0 4px 20px -2px rgba(197, 160, 89, 0.25)' }
                 }
             }
         }
     </script>
 
     <style>
-        body {
-            background-color: #FBFBFA;
-            color: #1a1a1a;
-        }
-
+        body { background-color: #FBFBFA; color: #1a1a1a; }
+        
         @keyframes flowOut {
-            0% {
-                opacity: 0;
-                transform: translateY(-20px) scale(0.98);
-                filter: blur(4px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-                filter: blur(0);
-            }
+            0% { opacity: 0; transform: translateY(-15px); filter: blur(2px); }
+            100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        .anim-flow {
+            animation: flowOut 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
         }
 
-        .result-card {
-            opacity: 0;
-            animation: flowOut 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-        }
-
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background-color: #E5E5E5; border-radius: 20px; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background-color: #E5E5E5; border-radius: 10px; }
         
         .loader {
-            border: 2px solid #f3f3f3;
-            border-top: 2px solid #C5A059;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
+            border: 2px solid #f3f3f3; border-top: 2px solid #C5A059;
+            border-radius: 50%; width: 20px; height: 20px;
+            animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Пульсация для skeleton-загрузки */
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        .skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 4px;
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center pt-32 px-4 relative overflow-x-hidden">
 
     <!-- Логотип -->
-    <div class="mb-12 text-center transition-all duration-700" id="logo-container">
+    <div class="mb-10 text-center transition-all duration-500" id="logo-container">
         <h1 class="text-4xl font-light tracking-[0.2em] text-gray-800 uppercase">
             Asinhrom <span class="text-gold font-normal">Search</span>
         </h1>
-        <p class="text-gray-400 text-sm mt-2 tracking-widest font-light">POWERED BY DUCKDUCKGO</p>
+        <p class="text-gray-400 text-sm mt-2 tracking-widest font-light">INTELLIGENT HYBRID SYSTEM</p>
     </div>
 
-    <!-- Поисковый блок -->
+    <!-- Поисковая строка -->
     <div class="w-full max-w-2xl relative z-10 group">
         <div class="relative flex items-center">
             <svg class="absolute left-6 w-5 h-5 text-gray-400 group-focus-within:text-gold transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,16 +64,15 @@
             <input 
                 type="text" 
                 id="searchInput"
-                placeholder="Введите ваш запрос..." 
-                class="w-full h-16 pl-16 pr-36 bg-white border border-gray-200 rounded-full text-lg text-gray-700 placeholder-gray-300 outline-none transition-all duration-500 focus:border-gold focus:shadow-gold-glow"
+                placeholder="Введите запрос..." 
+                class="w-full h-16 pl-16 pr-36 bg-white border border-gray-200 rounded-full text-lg text-gray-700 placeholder-gray-300 outline-none transition-all duration-300 focus:border-gold focus:shadow-gold-glow"
             >
             
             <button 
-                id="searchBtn"
                 onclick="performSearch()"
                 class="absolute right-2 top-2 bottom-2 px-8 bg-gold hover:bg-gold-dark text-white font-medium rounded-full transition-all duration-300 shadow-sm flex items-center justify-center min-w-[100px]"
             >
-                <span id="btnText">Поиск</span>
+                <span id="btnText">Найти</span>
                 <div id="btnLoader" class="loader hidden"></div>
             </button>
         </div>
@@ -131,255 +89,211 @@
         const btnLoader = document.getElementById('btnLoader');
         const logoContainer = document.getElementById('logo-container');
 
+        // Сервисы для fallback (показываются ТОЛЬКО если нет результатов)
+        const fallbackServices = [
+            { name: "Google", url: "https://www.google.com/search?q=", icon: "G" },
+            { name: "Yandex", url: "https://yandex.ru/search/?text=", icon: "Я" },
+            { name: "Wildberries", url: "https://www.wildberries.ru/catalog/search.aspx?search=", icon: "WB" },
+            { name: "YouTube", url: "https://www.youtube.com/results?search_query=", icon: "▶" },
+            { name: "Ozon", url: "https://www.ozon.ru/search/?text=", icon: "Oz" },
+            { name: "DuckDuckGo", url: "https://duckduckgo.com/?q=", icon: "🔍" }
+        ];
+
         async function performSearch() {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            // UI: состояние загрузки
+            // UI Start
             btnText.classList.add('hidden');
             btnLoader.classList.remove('hidden');
             resultsContainer.innerHTML = '';
-            
             logoContainer.style.transform = "scale(0.8)";
-            logoContainer.style.opacity = "0.7";
-            logoContainer.style.marginBottom = "2rem";
+            logoContainer.style.opacity = "0.6";
 
-            // Показываем skeleton-загрузку
-            showSkeletons();
+            let foundAnyResults = false;
 
             try {
-                // Запрос к DuckDuckGo Instant Answer API
-                const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1&no_redirect=1`;
+                // 1. Пробуем быстрый API (Instant Answer)
+                // Используем no_redirect=1 чтобы не тратить время на редиректы
+                const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`;
                 
                 const response = await fetch(apiUrl);
                 const data = await response.json();
+
+                let items = [];
+
+                // Проверяем Abstract (главный ответ)
+                if (data.Abstract && data.AbstractURL) {
+                    items.push({
+                        title: data.Heading || query,
+                        url: data.AbstractURL,
+                        desc: data.Abstract,
+                        source: "Справка"
+                    });
+                }
+
+                // Проверяем RelatedTopics (связанные сайты)
+                if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                    data.RelatedTopics.forEach(topic => {
+                        // Прямые темы
+                        if (topic.FirstURL && topic.Text) {
+                            items.push({
+                                title: topic.Text.split(' - ')[0],
+                                url: topic.FirstURL,
+                                desc: topic.Text,
+                                source: "Результат"
+                            });
+                        } 
+                        // Вложенные темы
+                        else if (topic.Topics) {
+                            topic.Topics.forEach(sub => {
+                                if (sub.FirstURL) {
+                                    items.push({
+                                        title: sub.Text.split(' - ')[0],
+                                        url: sub.FirstURL,
+                                        desc: sub.Text,
+                                        source: "Тема"
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // РЕШАЮЩИЙ МОМЕНТ:
+                // Если мы нашли хоть какие-то элементы в API -> Рендерим их как список
+                if (items.length > 0) {
+                    foundAnyResults = true;
+                    renderRealResults(items.slice(0, 10)); // Показываем топ-10
+                } 
                 
-                // Убираем skeleton
-                resultsContainer.innerHTML = '';
-                
-                // Рендерим результаты
-                renderResults(data, query);
-                
+                // 2. Если API вернул пустоту (нет мгновенных ответов), пробуем HTML парсинг
+                if (!foundAnyResults) {
+                    // Пытаемся загрузить полную выдачу через прокси
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`)}`;
+                    
+                    try {
+                        const deepResp = await fetch(proxyUrl);
+                        const deepData = await deepResp.json();
+                        
+                        if (deepData.contents) {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(deepData.contents, 'text/html');
+                            const elements = doc.querySelectorAll('.result__body');
+                            
+                            const deepItems = [];
+                            elements.forEach(el => {
+                                const titleEl = el.querySelector('.result__a');
+                                const snippetEl = el.querySelector('.result__snippet');
+                                if (titleEl && snippetEl) {
+                                    deepItems.push({
+                                        title: titleEl.textContent,
+                                        url: titleEl.getAttribute('href'),
+                                        desc: snippetEl.textContent,
+                                        source: "Веб"
+                                    });
+                                }
+                            });
+
+                            if (deepItems.length > 0) {
+                                foundAnyResults = true;
+                                renderRealResults(deepItems);
+                            }
+                        }
+                    } catch (e) {
+                        console.log("Deep search failed or blocked");
+                    }
+                }
+
             } catch (error) {
-                console.error('Ошибка поиска:', error);
-                resultsContainer.innerHTML = '';
-                renderError(query);
+                console.error("Main error:", error);
+                // Ошибку игнорируем, чтобы проверить fallback ниже
             } finally {
-                // Возврат кнопки
                 btnText.classList.remove('hidden');
                 btnLoader.classList.add('hidden');
+                
+                // 3. FINAL CHECK: Если ничего не нашли ни там, ни там -> Показываем кнопки
+                if (!foundAnyResults) {
+                    renderFallbackGrid(query);
+                }
             }
         }
 
-        function showSkeletons() {
-            for (let i = 0; i < 3; i++) {
-                const skeleton = document.createElement('div');
-                skeleton.className = 'bg-white border border-gray-100 rounded-xl p-6';
-                skeleton.innerHTML = `
-                    <div class="skeleton h-5 w-2/3 mb-3"></div>
-                    <div class="skeleton h-3 w-full mb-2"></div>
-                    <div class="skeleton h-3 w-4/5"></div>
+        // Рендер СПИСКА результатов (Карточки с описанием)
+        function renderRealResults(items) {
+            resultsContainer.className = "w-full max-w-2xl mt-8 pb-20 space-y-4";
+            resultsContainer.innerHTML = '';
+            
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `
+                    anim-flow 
+                    bg-white border border-gold/30 hover:border-gold 
+                    rounded-xl p-5 
+                    transition-all duration-300 hover:shadow-gold-glow hover:-translate-y-1
+                    flex flex-col md:flex-row md:items-start justify-between gap-3
                 `;
-                resultsContainer.appendChild(skeleton);
-            }
-        }
+                card.style.animationDelay = `${index * 60}ms`;
 
-        function renderResults(data, query) {
-            const results = [];
+                let domain = 'Сайт';
+                try { domain = new URL(item.url).hostname.replace('www.', ''); } catch(e){}
 
-            // 1. Основной Abstract (если есть)
-            if (data.Abstract && data.AbstractURL) {
-                results.push({
-                    title: data.Heading || query,
-                    url: data.AbstractURL,
-                    desc: data.Abstract,
-                    source: data.AbstractSource || 'DuckDuckGo'
-                });
-            }
-
-            // 2. Основные Results
-            if (data.Results && data.Results.length > 0) {
-                data.Results.forEach(r => {
-                    if (r.Text && r.FirstURL) {
-                        results.push({
-                            title: r.Text.split(' - ')[0] || r.Text.substring(0, 60),
-                            url: r.FirstURL,
-                            desc: r.Text,
-                            source: 'Результат'
-                        });
-                    }
-                });
-            }
-
-            // 3. Related Topics (связанные темы)
-            if (data.RelatedTopics && data.RelatedTopics.length > 0) {
-                data.RelatedTopics.forEach(topic => {
-                    // Некоторые темы — это категории с подтемами
-                    if (topic.Topics) {
-                        topic.Topics.slice(0, 3).forEach(sub => {
-                            if (sub.Text && sub.FirstURL) {
-                                results.push(parseTopicText(sub.Text, sub.FirstURL));
-                            }
-                        });
-                    } else if (topic.Text && topic.FirstURL) {
-                        results.push(parseTopicText(topic.Text, topic.FirstURL));
-                    }
-                });
-            }
-
-            // Если ничего не нашли
-            if (results.length === 0) {
-                renderNoResults(query);
-                return;
-            }
-
-            // Ограничиваем до 8 результатов
-            const limitedResults = results.slice(0, 8);
-
-            // Рендерим карточки
-            limitedResults.forEach((item, index) => {
-                const card = createResultCard(item, index);
+                card.innerHTML = `
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-[10px] text-gold font-bold tracking-wider uppercase bg-gold/10 px-2 py-0.5 rounded">${item.source}</span>
+                            <span class="text-xs text-gray-400 truncate max-w-[150px]">${domain}</span>
+                        </div>
+                        <h3 class="text-lg font-semibold text-gray-800 leading-snug mb-1">
+                            <a href="${item.url}" target="_blank" class="hover:text-gold transition-colors">${item.title}</a>
+                        </h3>
+                        <p class="text-sm text-gray-500 font-light line-clamp-2">${item.desc}</p>
+                    </div>
+                    <div class="flex-shrink-0 self-end md:self-center">
+                        <a href="${item.url}" target="_blank" 
+                           class="inline-flex items-center px-5 py-2 border border-gold text-gold hover:bg-gold hover:text-white rounded-lg transition-colors duration-300 text-sm font-medium">
+                            Перейти
+                        </a>
+                    </div>
+                `;
                 resultsContainer.appendChild(card);
             });
-
-            // Добавляем карточку-приглашение на полный поиск
-            const fullSearchCard = createFullSearchCard(query, limitedResults.length);
-            resultsContainer.appendChild(fullSearchCard);
         }
 
-        // Парсинг текста из RelatedTopics (формат: "Описание - https://ссылка")
-        function parseTopicText(text, url) {
-            let title = text;
-            let desc = text;
-            
-            // Если текст содержит URL в конце, разделяем
-            const urlMatch = text.match(/^(.*?)\s+(https?:\/\/\S+)$/);
-            if (urlMatch) {
-                title = urlMatch[1].split(' - ')[0];
-                desc = urlMatch[1];
-            } else {
-                title = text.split(' - ')[0].substring(0, 70);
-            }
+        // Рендер КНОПОК-СЕРВИСОВ (Fallback)
+        function renderFallbackGrid(query) {
+            resultsContainer.className = "w-full max-w-4xl mt-12 pb-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5";
+            resultsContainer.innerHTML = '';
 
-            return { title, url, desc, source: 'Тема' };
-        }
+            fallbackServices.forEach((service, index) => {
+                const finalUrl = `${service.url}${encodeURIComponent(query)}`;
+                const card = document.createElement('div');
+                card.className = `
+                    anim-flow group
+                    bg-white border border-gold/30 hover:border-gold 
+                    rounded-xl p-5 cursor-pointer
+                    transition-all duration-300 hover:shadow-gold-glow hover:-translate-y-1
+                    flex items-center gap-4 relative overflow-hidden
+                `;
+                card.style.animationDelay = `${index * 60}ms`;
+                card.onclick = () => window.open(finalUrl, '_blank');
 
-        function createResultCard(item, index) {
-            const card = document.createElement('div');
-            card.className = `
-                result-card 
-                bg-white border border-gold/30 hover:border-gold 
-                rounded-xl p-6 
-                transition-all duration-300 hover:shadow-gold-glow hover:-translate-y-1
-                flex flex-col md:flex-row md:items-center justify-between gap-4
-            `;
-            card.style.animationDelay = `${index * 120}ms`;
-
-            // Извлекаем домен для отображения
-            let domain = '';
-            try {
-                domain = new URL(item.url).hostname.replace('www.', '');
-            } catch (e) {
-                domain = item.url;
-            }
-
-            card.innerHTML = `
-                <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                        <span class="text-xs text-gold font-medium tracking-wider uppercase">${item.source}</span>
-                        <span class="text-xs text-gray-400 truncate">${domain}</span>
+                card.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-br from-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <div class="w-12 h-12 rounded-full bg-gray-50 border border-gray-100 flex items-center justify-center text-xl font-bold text-gray-700 group-hover:border-gold group-hover:text-gold transition-colors relative z-10">
+                        ${service.icon}
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-1 truncate">${item.title}</h3>
-                    <p class="text-sm text-gray-500 font-light leading-relaxed line-clamp-2">${item.desc}</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <a href="${item.url}" target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center px-6 py-2 border border-gold text-gold hover:bg-gold hover:text-white rounded-lg transition-colors duration-300 text-sm font-medium tracking-wide">
-                        Перейти
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                        </svg>
-                    </a>
-                </div>
-            `;
-            return card;
-        }
-
-        function createFullSearchCard(query, count) {
-            const card = document.createElement('div');
-            card.className = `
-                result-card
-                bg-gradient-to-r from-gold/5 to-transparent 
-                border border-gold/40 
-                rounded-xl p-6 
-                flex flex-col md:flex-row md:items-center justify-between gap-4
-            `;
-            card.style.animationDelay = `${count * 120}ms`;
-
-            const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-
-            card.innerHTML = `
-                <div class="flex-1">
-                    <div class="flex items-center gap-2 mb-1">
-                        <svg class="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                        </svg>
-                        <span class="text-sm text-gold font-medium tracking-wider uppercase">Полный поиск</span>
+                    <div class="relative z-10">
+                        <h3 class="text-base font-semibold text-gray-800 group-hover:text-gold transition-colors">${service.name}</h3>
+                        <p class="text-xs text-gray-400 mt-0.5">Искать "${query}"</p>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Все результаты по запросу "${query}"</h3>
-                    <p class="text-sm text-gray-500 font-light">Открыть полную выдачу DuckDuckGo с тысячами результатов</p>
-                </div>
-                <div class="flex-shrink-0">
-                    <a href="${ddgUrl}" target="_blank" rel="noopener noreferrer"
-                       class="inline-flex items-center px-6 py-2 bg-gold hover:bg-gold-dark text-white rounded-lg transition-colors duration-300 text-sm font-medium tracking-wide shadow-sm">
-                        Открыть всё
-                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                        </svg>
-                    </a>
-                </div>
-            `;
-            return card;
+                `;
+                resultsContainer.appendChild(card);
+            });
         }
 
-        function renderNoResults(query) {
-            const card = document.createElement('div');
-            card.className = 'result-card bg-white border border-gold/30 rounded-xl p-8 text-center';
-            const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
-            
-            card.innerHTML = `
-                <svg class="w-12 h-12 text-gold mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <h3 class="text-lg font-semibold text-gray-800 mb-2">Мгновенных ответов не найдено</h3>
-                <p class="text-sm text-gray-500 mb-6">Но вы можете посмотреть полную выдачу на DuckDuckGo</p>
-                <a href="${ddgUrl}" target="_blank" rel="noopener noreferrer"
-                   class="inline-flex items-center px-6 py-2 bg-gold hover:bg-gold-dark text-white rounded-lg transition-colors duration-300 text-sm font-medium">
-                    Искать на DuckDuckGo
-                </a>
-            `;
-            resultsContainer.appendChild(card);
-        }
-
-        function renderError(query) {
-            const card = document.createElement('div');
-            card.className = 'result-card bg-white border border-red-200 rounded-xl p-6 text-center';
-            card.innerHTML = `
-                <p class="text-gray-600 mb-4">Произошла ошибка при загрузке результатов</p>
-                <a href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank"
-                   class="inline-flex items-center px-6 py-2 bg-gold text-white rounded-lg text-sm">
-                    Попробовать на DuckDuckGo
-                </a>
-            `;
-            resultsContainer.appendChild(card);
-        }
-
-        // Enter для поиска
-        searchInput.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') performSearch();
-        });
-
-        // Автофокус при загрузке
+        searchInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') performSearch(); });
         window.addEventListener('load', () => searchInput.focus());
     </script>
 </body>
