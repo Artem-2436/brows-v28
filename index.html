@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asinhrom Search | Premium Experience</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            DEFAULT: '#C5A059',
+                            light: '#D4AF37',
+                            dark: '#AA8B4B',
+                            bg: '#FBFBFA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'gold-glow': '0 4px 20px -2px rgba(197, 160, 89, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #FBFBFA;
+            color: #1a1a1a;
+        }
+
+        @keyframes flowOut {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.98);
+                filter: blur(4px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+                filter: blur(0);
+            }
+        }
+
+        .result-card {
+            opacity: 0;
+            animation: flowOut 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background-color: #E5E5E5; border-radius: 20px; }
+        
+        .loader {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #C5A059;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Пульсация для skeleton-загрузки */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center pt-32 px-4 relative overflow-x-hidden">
+
+    <!-- Логотип -->
+    <div class="mb-12 text-center transition-all duration-700" id="logo-container">
+        <h1 class="text-4xl font-light tracking-[0.2em] text-gray-800 uppercase">
+            Asinhrom <span class="text-gold font-normal">Search</span>
+        </h1>
+        <p class="text-gray-400 text-sm mt-2 tracking-widest font-light">POWERED BY DUCKDUCKGO</p>
+    </div>
+
+    <!-- Поисковый блок -->
+    <div class="w-full max-w-2xl relative z-10 group">
+        <div class="relative flex items-center">
+            <svg class="absolute left-6 w-5 h-5 text-gray-400 group-focus-within:text-gold transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            
+            <input 
+                type="text" 
+                id="searchInput"
+                placeholder="Введите ваш запрос..." 
+                class="w-full h-16 pl-16 pr-36 bg-white border border-gray-200 rounded-full text-lg text-gray-700 placeholder-gray-300 outline-none transition-all duration-500 focus:border-gold focus:shadow-gold-glow"
+            >
+            
+            <button 
+                id="searchBtn"
+                onclick="performSearch()"
+                class="absolute right-2 top-2 bottom-2 px-8 bg-gold hover:bg-gold-dark text-white font-medium rounded-full transition-all duration-300 shadow-sm flex items-center justify-center min-w-[100px]"
+            >
+                <span id="btnText">Поиск</span>
+                <div id="btnLoader" class="loader hidden"></div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Контейнер результатов -->
+    <div id="resultsContainer" class="w-full max-w-2xl mt-8 pb-20 space-y-4">
+    </div>
+
+    <script>
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const btnText = document.getElementById('btnText');
+        const btnLoader = document.getElementById('btnLoader');
+        const logoContainer = document.getElementById('logo-container');
+
+        async function performSearch() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            // UI: состояние загрузки
+            btnText.classList.add('hidden');
+            btnLoader.classList.remove('hidden');
+            resultsContainer.innerHTML = '';
+            
+            logoContainer.style.transform = "scale(0.8)";
+            logoContainer.style.opacity = "0.7";
+            logoContainer.style.marginBottom = "2rem";
+
+            // Показываем skeleton-загрузку
+            showSkeletons();
+
+            try {
+                // Запрос к DuckDuckGo Instant Answer API
+                const apiUrl = `https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1&no_redirect=1`;
+                
+                const response = await fetch(apiUrl);
+                const data = await response.json();
+                
+                // Убираем skeleton
+                resultsContainer.innerHTML = '';
+                
+                // Рендерим результаты
+                renderResults(data, query);
+                
+            } catch (error) {
+                console.error('Ошибка поиска:', error);
+                resultsContainer.innerHTML = '';
+                renderError(query);
+            } finally {
+                // Возврат кнопки
+                btnText.classList.remove('hidden');
+                btnLoader.classList.add('hidden');
+            }
+        }
+
+        function showSkeletons() {
+            for (let i = 0; i < 3; i++) {
+                const skeleton = document.createElement('div');
+                skeleton.className = 'bg-white border border-gray-100 rounded-xl p-6';
+                skeleton.innerHTML = `
+                    <div class="skeleton h-5 w-2/3 mb-3"></div>
+                    <div class="skeleton h-3 w-full mb-2"></div>
+                    <div class="skeleton h-3 w-4/5"></div>
+                `;
+                resultsContainer.appendChild(skeleton);
+            }
+        }
+
+        function renderResults(data, query) {
+            const results = [];
+
+            // 1. Основной Abstract (если есть)
+            if (data.Abstract && data.AbstractURL) {
+                results.push({
+                    title: data.Heading || query,
+                    url: data.AbstractURL,
+                    desc: data.Abstract,
+                    source: data.AbstractSource || 'DuckDuckGo'
+                });
+            }
+
+            // 2. Основные Results
+            if (data.Results && data.Results.length > 0) {
+                data.Results.forEach(r => {
+                    if (r.Text && r.FirstURL) {
+                        results.push({
+                            title: r.Text.split(' - ')[0] || r.Text.substring(0, 60),
+                            url: r.FirstURL,
+                            desc: r.Text,
+                            source: 'Результат'
+                        });
+                    }
+                });
+            }
+
+            // 3. Related Topics (связанные темы)
+            if (data.RelatedTopics && data.RelatedTopics.length > 0) {
+                data.RelatedTopics.forEach(topic => {
+                    // Некоторые темы — это категории с подтемами
+                    if (topic.Topics) {
+                        topic.Topics.slice(0, 3).forEach(sub => {
+                            if (sub.Text && sub.FirstURL) {
+                                results.push(parseTopicText(sub.Text, sub.FirstURL));
+                            }
+                        });
+                    } else if (topic.Text && topic.FirstURL) {
+                        results.push(parseTopicText(topic.Text, topic.FirstURL));
+                    }
+                });
+            }
+
+            // Если ничего не нашли
+            if (results.length === 0) {
+                renderNoResults(query);
+                return;
+            }
+
+            // Ограничиваем до 8 результатов
+            const limitedResults = results.slice(0, 8);
+
+            // Рендерим карточки
+            limitedResults.forEach((item, index) => {
+                const card = createResultCard(item, index);
+                resultsContainer.appendChild(card);
+            });
+
+            // Добавляем карточку-приглашение на полный поиск
+            const fullSearchCard = createFullSearchCard(query, limitedResults.length);
+            resultsContainer.appendChild(fullSearchCard);
+        }
+
+        // Парсинг текста из RelatedTopics (формат: "Описание - https://ссылка")
+        function parseTopicText(text, url) {
+            let title = text;
+            let desc = text;
+            
+            // Если текст содержит URL в конце, разделяем
+            const urlMatch = text.match(/^(.*?)\s+(https?:\/\/\S+)$/);
+            if (urlMatch) {
+                title = urlMatch[1].split(' - ')[0];
+                desc = urlMatch[1];
+            } else {
+                title = text.split(' - ')[0].substring(0, 70);
+            }
+
+            return { title, url, desc, source: 'Тема' };
+        }
+
+        function createResultCard(item, index) {
+            const card = document.createElement('div');
+            card.className = `
+                result-card 
+                bg-white border border-gold/30 hover:border-gold 
+                rounded-xl p-6 
+                transition-all duration-300 hover:shadow-gold-glow hover:-translate-y-1
+                flex flex-col md:flex-row md:items-center justify-between gap-4
+            `;
+            card.style.animationDelay = `${index * 120}ms`;
+
+            // Извлекаем домен для отображения
+            let domain = '';
+            try {
+                domain = new URL(item.url).hostname.replace('www.', '');
+            } catch (e) {
+                domain = item.url;
+            }
+
+            card.innerHTML = `
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs text-gold font-medium tracking-wider uppercase">${item.source}</span>
+                        <span class="text-xs text-gray-400 truncate">${domain}</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1 truncate">${item.title}</h3>
+                    <p class="text-sm text-gray-500 font-light leading-relaxed line-clamp-2">${item.desc}</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="${item.url}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center px-6 py-2 border border-gold text-gold hover:bg-gold hover:text-white rounded-lg transition-colors duration-300 text-sm font-medium tracking-wide">
+                        Перейти
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                        </svg>
+                    </a>
+                </div>
+            `;
+            return card;
+        }
+
+        function createFullSearchCard(query, count) {
+            const card = document.createElement('div');
+            card.className = `
+                result-card
+                bg-gradient-to-r from-gold/5 to-transparent 
+                border border-gold/40 
+                rounded-xl p-6 
+                flex flex-col md:flex-row md:items-center justify-between gap-4
+            `;
+            card.style.animationDelay = `${count * 120}ms`;
+
+            const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+
+            card.innerHTML = `
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <svg class="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+                        </svg>
+                        <span class="text-sm text-gold font-medium tracking-wider uppercase">Полный поиск</span>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-1">Все результаты по запросу "${query}"</h3>
+                    <p class="text-sm text-gray-500 font-light">Открыть полную выдачу DuckDuckGo с тысячами результатов</p>
+                </div>
+                <div class="flex-shrink-0">
+                    <a href="${ddgUrl}" target="_blank" rel="noopener noreferrer"
+                       class="inline-flex items-center px-6 py-2 bg-gold hover:bg-gold-dark text-white rounded-lg transition-colors duration-300 text-sm font-medium tracking-wide shadow-sm">
+                        Открыть всё
+                        <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                        </svg>
+                    </a>
+                </div>
+            `;
+            return card;
+        }
+
+        function renderNoResults(query) {
+            const card = document.createElement('div');
+            card.className = 'result-card bg-white border border-gold/30 rounded-xl p-8 text-center';
+            const ddgUrl = `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
+            
+            card.innerHTML = `
+                <svg class="w-12 h-12 text-gold mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-semibold text-gray-800 mb-2">Мгновенных ответов не найдено</h3>
+                <p class="text-sm text-gray-500 mb-6">Но вы можете посмотреть полную выдачу на DuckDuckGo</p>
+                <a href="${ddgUrl}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center px-6 py-2 bg-gold hover:bg-gold-dark text-white rounded-lg transition-colors duration-300 text-sm font-medium">
+                    Искать на DuckDuckGo
+                </a>
+            `;
+            resultsContainer.appendChild(card);
+        }
+
+        function renderError(query) {
+            const card = document.createElement('div');
+            card.className = 'result-card bg-white border border-red-200 rounded-xl p-6 text-center';
+            card.innerHTML = `
+                <p class="text-gray-600 mb-4">Произошла ошибка при загрузке результатов</p>
+                <a href="https://duckduckgo.com/?q=${encodeURIComponent(query)}" target="_blank"
+                   class="inline-flex items-center px-6 py-2 bg-gold text-white rounded-lg text-sm">
+                    Попробовать на DuckDuckGo
+                </a>
+            `;
+            resultsContainer.appendChild(card);
+        }
+
+        // Enter для поиска
+        searchInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') performSearch();
+        });
+
+        // Автофокус при загрузке
+        window.addEventListener('load', () => searchInput.focus());
+    </script>
+</body>
+</html>
